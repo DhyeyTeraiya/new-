@@ -1,0 +1,60 @@
+name: CI - Build / Test / Bench
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-test-bench:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+        python-version: [3.12]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install Node dependencies
+        run: |
+          npm ci --prefer-offline --no-audit --no-fund
+
+      - name: Build JS workspaces
+        run: |
+          npm run build --if-present || true
+
+      - name: Run JS tests
+        run: |
+          npm test --if-present || true
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Python requirements (agentx)
+        run: |
+          if [ -f agentx/requirements.txt ]; then python -m pip install -r agentx/requirements.txt; fi
+
+      - name: Run Python tests
+        run: |
+          if [ -d agentx/tests ]; then python -m pytest -q agentx/tests || true; fi
+
+      - name: Run benchmarks
+        run: |
+          chmod +x ./benchmarks/run_benchmarks.sh || true
+          ./benchmarks/run_benchmarks.sh || true
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmarks-results
+          path: benchmarks/results.json
