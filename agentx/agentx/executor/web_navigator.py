@@ -8,20 +8,42 @@ from ..logging.logger import get_logger
 from ..security import SecurityManager
 from ..memory.vector_store import SimpleVectorStore
 from .selector_memory import SelectorMemory
+from .browser_pool import BrowserPool, PageHandle
 
 logger = get_logger('navigator')
 
 class WebNavigator:
     recorder = None  # set externally to enable recording
-    def __init__(self, security: SecurityManager | None = None):
+    def __init__(self, security: SecurityManager | None = None, pool: BrowserPool | None = None):
+        """If a `BrowserPool` is provided, `WebNavigator` will acquire pages from the pool instead
+        of launching its own Playwright browser. This reduces startup latency and increases
+        throughput when running many short browser tasks.
+        """
         self.security = security or SecurityManager()
         self._playwright = None
         self.browser = None
         self.context = None
         self.page = None
         self.sel_mem = SelectorMemory()
+        self.pool = pool
+        self._page_handle: PageHandle | None = None
 
     def start(self, headless: bool = True, downloads_path: str | None = None):
+        # If a BrowserPool is provided, acquire a page from the pool instead of starting a new browser
+        if self.pool:
+            # ensure pool is started
+            try:
+                self.pool.start()
+                # acquire a page and store handle
+                self._page_handle = self.pool._acquire()
+                self.page = self._page_handle.page
+                self.context = self.page.context
+                self.browser = None
+                logger.info('Acquired page from BrowserPool')
+                return
+            except Exception:
+                logger.exception('Failed to acquire page from pool; falling back to local Playwright')
+
         if self._playwright:
             return
         self._playwright = sync_playwright().start()
@@ -41,14 +63,24 @@ class WebNavigator:
 
     def stop(self):
         with contextlib.suppress(Exception):
-            if self.page:
-                self.page.close()
-            if self.context:
-                self.context.close()
-            if self.browser:
-                self.browser.close()
-            if self._playwright:
-                self._playwright.stop()
+            # If page was acquired from pool, release it rather than closing
+            if self._page_handle:
+                try:
+                    self._page_handle.release()
+                except Exception:
+                    logger.exception('Failed releasing pooled page')
+                self._page_handle = None
+                self.page = None
+                self.context = None
+            else:
+                if self.page:
+                    self.page.close()
+                if self.context:
+                    self.context.close()
+                if self.browser:
+                    self.browser.close()
+                if self._playwright:
+                    self._playwright.stop()
         self._playwright = None
         self.browser = None
         self.context = None
