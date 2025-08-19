@@ -1,0 +1,114 @@
+# =============================================================================
+# ENTERPRISE BROWSER AI AGENT API - DEVELOPMENT DOCKERFILE
+# Superior to Manus AI with Multi-Stage Build & Advanced Optimization
+# =============================================================================
+
+# Stage 1: Base Node.js Image with Enterprise Features
+FROM node:20-alpine AS base
+
+# Install system dependencies for enterprise features
+RUN apk add --no-cache \
+    dumb-init \
+    curl \
+    ca-certificates \
+    tzdata \
+    && rm -rf /var/cache/apk/*
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY apps/api/package*.json ./apps/api/
+COPY packages/shared/package*.json ./packages/shared/
+
+# Stage 2: Dependencies Installation
+FROM base AS deps
+
+# Install dependencies with npm ci for faster, reliable builds
+RUN npm ci --only=production && npm cache clean --force
+
+# Stage 3: Development Build
+FROM base AS development
+
+# Install all dependencies including dev dependencies
+RUN npm ci
+
+# Copy source code
+COPY . .
+
+# Set environment variables
+ENV NODE_ENV=development
+ENV PORT=4000
+ENV HOST=0.0.0.0
+
+# Expose port
+EXPOSE 4000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:4000/health || exit 1
+
+# Use dumb-init for proper signal handling
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start development server with hot reload
+CMD ["npm", "run", "dev"]
+
+# Stage 4: Production Build
+FROM base AS builder
+
+# Copy dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy source code
+COPY . .
+
+# Build the application
+RUN npm run build:api
+
+# Stage 5: Production Runtime
+FROM base AS production
+
+# Copy production dependencies
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy built application
+COPY --from=builder /app/apps/api/dist ./apps/api/dist
+COPY --from=builder /app/apps/api/package.json ./apps/api/
+
+# Change ownership to nodejs user
+RUN chown -R nodejs:nodejs /app
+USER nodejs
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=4000
+ENV HOST=0.0.0.0
+
+# Expose port
+EXPOSE 4000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:4000/health || exit 1
+
+# Use dumb-init for proper signal handling
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start production server
+CMD ["node", "apps/api/dist/index.js"]
+
+# =============================================================================
+# METADATA
+# =============================================================================
+LABEL maintainer="Browser AI Agent Team"
+LABEL version="2.0.0"
+LABEL description="Enterprise Browser AI Agent API - Superior to Manus AI"
+LABEL org.opencontainers.image.source="https://github.com/browser-ai-agent/api"
+LABEL org.opencontainers.image.documentation="https://docs.browser-ai-agent.com"
+LABEL org.opencontainers.image.licenses="MIT"

@@ -1,0 +1,274 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  name              String
+  avatarUrl         String?  @map("avatar_url")
+  passwordHash      String?  @map("password_hash")
+  emailVerified     Boolean  @default(false) @map("email_verified")
+  emailVerifiedAt   DateTime? @map("email_verified_at")
+  
+  // OAuth fields
+  googleId          String?  @unique @map("google_id")
+  githubId          String?  @unique @map("github_id")
+  
+  // Subscription
+  planId            String?  @map("plan_id")
+  plan              SubscriptionPlan? @relation(fields: [planId], references: [id])
+  stripeCustomerId  String?  @unique @map("stripe_customer_id")
+  
+  // Preferences
+  preferences       Json     @default("{}")
+  
+  // Timestamps
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  lastActiveAt      DateTime @default(now()) @map("last_active_at")
+  
+  // Relations
+  conversations     Conversation[]
+  workflows         Workflow[]
+  executions        Execution[]
+  apiKeys           ApiKey[]
+  sessions          Session[]
+  organizations     OrganizationMember[]
+  
+  @@map("users")
+}
+
+model SubscriptionPlan {
+  id                String   @id @default(cuid())
+  name              String
+  description       String?
+  price             Int      // in cents
+  currency          String   @default("usd")
+  interval          String   // month, year
+  features          Json     @default("[]")
+  limits            Json     @default("{}")
+  stripePriceId     String?  @unique @map("stripe_price_id")
+  
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  users             User[]
+  
+  @@map("subscription_plans")
+}
+
+model Session {
+  id                String   @id @default(cuid())
+  userId            String   @map("user_id")
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  token             String   @unique
+  refreshToken      String?  @unique @map("refresh_token")
+  expiresAt         DateTime @map("expires_at")
+  refreshExpiresAt  DateTime? @map("refresh_expires_at")
+  
+  ipAddress         String?  @map("ip_address")
+  userAgent         String?  @map("user_agent")
+  
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  
+  @@map("sessions")
+}
+
+model Conversation {
+  id                String   @id @default(cuid())
+  userId            String   @map("user_id")
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  title             String?
+  context           Json     @default("{}")
+  
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  messages          Message[]
+  
+  @@map("conversations")
+}
+
+model Message {
+  id                String   @id @default(cuid())
+  conversationId    String   @map("conversation_id")
+  conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  content           String
+  type              MessageType
+  metadata          Json     @default("{}")
+  
+  createdAt         DateTime @default(now()) @map("created_at")
+  
+  @@map("messages")
+}
+
+model Workflow {
+  id                String   @id @default(cuid())
+  userId            String   @map("user_id")
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name              String
+  description       String?
+  steps             Json     @default("[]")
+  triggers          Json     @default("[]")
+  settings          Json     @default("{}")
+  
+  isPublic          Boolean  @default(false) @map("is_public")
+  isTemplate        Boolean  @default(false) @map("is_template")
+  usageCount        Int      @default(0) @map("usage_count")
+  
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  executions        Execution[]
+  
+  @@map("workflows")
+}
+
+model Execution {
+  id                String   @id @default(cuid())
+  workflowId        String?  @map("workflow_id")
+  workflow          Workflow? @relation(fields: [workflowId], references: [id], onDelete: SetNull)
+  userId            String   @map("user_id")
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  status            ExecutionStatus
+  inputData         Json?    @map("input_data")
+  outputData        Json?    @map("output_data")
+  errorDetails      Json?    @map("error_details")
+  
+  startedAt         DateTime @default(now()) @map("started_at")
+  completedAt       DateTime? @map("completed_at")
+  durationMs        Int?     @map("duration_ms")
+  
+  @@map("executions")
+}
+
+model ApiKey {
+  id                String   @id @default(cuid())
+  userId            String   @map("user_id")
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name              String
+  key               String   @unique
+  permissions       Json     @default("[]")
+  
+  lastUsedAt        DateTime? @map("last_used_at")
+  expiresAt         DateTime? @map("expires_at")
+  
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  
+  @@map("api_keys")
+}
+
+model Organization {
+  id                String   @id @default(cuid())
+  name              String
+  slug              String   @unique
+  description       String?
+  
+  settings          Json     @default("{}")
+  
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  members           OrganizationMember[]
+  
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id                String   @id @default(cuid())
+  organizationId    String   @map("organization_id")
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId            String   @map("user_id")
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  role              OrganizationRole
+  permissions       Json     @default("[]")
+  
+  joinedAt          DateTime @default(now()) @map("joined_at")
+  
+  @@unique([organizationId, userId])
+  @@map("organization_members")
+}
+
+model PageAnalysis {
+  id                String   @id @default(cuid())
+  url               String
+  title             String?
+  screenshot        String?  // Base64 or file path
+  
+  elements          Json     @default("[]")
+  forms             Json     @default("[]")
+  interactions      Json     @default("[]")
+  accessibility     Json     @default("{}")
+  performance       Json     @default("{}")
+  
+  createdAt         DateTime @default(now()) @map("created_at")
+  
+  @@map("page_analyses")
+}
+
+model ErrorLog {
+  id                String   @id @default(cuid())
+  type              String
+  message           String
+  stack             String?
+  context           Json     @default("{}")
+  
+  userId            String?  @map("user_id")
+  sessionId         String?  @map("session_id")
+  requestId         String?  @map("request_id")
+  
+  resolved          Boolean  @default(false)
+  resolvedAt        DateTime? @map("resolved_at")
+  
+  createdAt         DateTime @default(now()) @map("created_at")
+  
+  @@map("error_logs")
+}
+
+// Enums
+enum MessageType {
+  USER
+  ASSISTANT
+  SYSTEM
+  ACTION
+  ERROR
+}
+
+enum ExecutionStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum OrganizationRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}

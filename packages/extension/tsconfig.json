@@ -1,0 +1,36 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": false,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "baseUrl": ".",
+    "paths": {
+      "@browser-ai-agent/shared": ["../shared/src"],
+      "@browser-ai-agent/shared/*": ["../shared/src/*"]
+    },
+    "types": ["chrome", "jest", "node"]
+  },
+  "include": [
+    "src/simple-*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "src/background",
+    "src/content",
+    "src/popup",
+    "src/widget",
+    "src/chat",
+    "src/utils"
+  ]
+}

@@ -1,0 +1,371 @@
+/* AI Widget Styles */
+/* This file contains additional styles for the widget that can be loaded separately */
+
+/* Animation keyframes */
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutToRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+  }
+}
+
+/* Widget container animations */
+.widget-container.animate-in {
+  animation: slideInFromRight 0.3s ease-out;
+}
+
+.widget-container.animate-out {
+  animation: slideOutToRight 0.3s ease-in;
+}
+
+/* Button animations */
+.widget-button.pulse {
+  animation: pulse 2s infinite;
+}
+
+.widget-button.bounce-in {
+  animation: bounceIn 0.6s ease-out;
+}
+
+/* Chat window animations */
+.chat-window.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Message animations */
+.message.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Typing indicator animation */
+.typing-indicator.slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading states */
+.widget-loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.widget-loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .chat-window {
+    background: #1f2937;
+    border-color: #374151;
+    color: #f9fafb;
+  }
+
+  .chat-header {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  }
+
+  .message.ai .message-content {
+    background: #374151;
+    color: #f9fafb;
+  }
+
+  .chat-input {
+    background: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+
+  .chat-input::placeholder {
+    color: #9ca3af;
+  }
+
+  .chat-input-container {
+    background: #1f2937;
+    border-color: #374151;
+  }
+
+  .quick-action-btn {
+    background: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+
+  .quick-action-btn:hover {
+    background: #4b5563;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .widget-button {
+    border: 2px solid #000;
+  }
+
+  .chat-window {
+    border: 2px solid #000;
+  }
+
+  .message.user .message-content {
+    background: #000;
+    color: #fff;
+  }
+
+  .message.ai .message-content {
+    background: #fff;
+    color: #000;
+    border: 1px solid #000;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .widget-button,
+  .chat-window,
+  .message,
+  .typing-indicator {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .widget-button:hover {
+    transform: none;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .widget-container {
+    top: 10px;
+    right: 10px;
+  }
+
+  .widget-button {
+    width: 50px;
+    height: 50px;
+  }
+
+  .chat-window {
+    width: calc(100vw - 20px);
+    height: calc(100vh - 80px);
+    bottom: 60px;
+    right: -10px;
+  }
+
+  .chat-messages {
+    padding: 12px;
+  }
+
+  .chat-input-container {
+    padding: 12px;
+  }
+
+  .quick-actions {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .quick-action-btn {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .widget-container {
+    display: none !important;
+  }
+}
+
+/* Focus indicators for accessibility */
+.widget-button:focus-visible,
+.chat-action-btn:focus-visible,
+.send-button:focus-visible,
+.quick-action-btn:focus-visible,
+.message-action-btn:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+.chat-input:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Custom scrollbar for webkit browsers */
+.chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Firefox scrollbar */
+.chat-messages {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+/* Error states */
+.widget-error {
+  border: 2px solid #ef4444;
+  background: #fef2f2;
+}
+
+.message.error .message-content {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+/* Success states */
+.message.success .message-content {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+/* Loading message */
+.message.loading .message-content {
+  background: #f3f4f6;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Notification styles */
+.notification-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #374151;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 2147483648;
+  animation: slideInFromRight 0.3s ease-out;
+  max-width: 300px;
+  word-wrap: break-word;
+}
+
+.notification-toast.success {
+  background: #059669;
+}
+
+.notification-toast.error {
+  background: #dc2626;
+}
+
+.notification-toast.warning {
+  background: #d97706;
+}

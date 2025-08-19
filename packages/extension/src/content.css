@@ -1,0 +1,133 @@
+/* Browser AI Agent Content Script Styles */
+
+/* Element highlighting */
+.ai-agent-highlight {
+  outline: 3px solid #3b82f6 !important;
+  outline-offset: 2px !important;
+  background-color: rgba(59, 130, 246, 0.1) !important;
+  transition: all 0.3s ease !important;
+  position: relative !important;
+  z-index: 9999 !important;
+}
+
+.ai-agent-highlight::before {
+  content: 'AI Agent Target';
+  position: absolute;
+  top: -30px;
+  left: 0;
+  background: #3b82f6;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  white-space: nowrap;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+/* Floating widget container (will be implemented in task 8) */
+.ai-agent-widget-container {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  z-index: 2147483647 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+/* Automation mode overlay (will be implemented in task 9) */
+.ai-agent-automation-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: rgba(0, 0, 0, 0.1) !important;
+  z-index: 2147483646 !important;
+  pointer-events: none !important;
+}
+
+/* Loading indicator */
+.ai-agent-loading {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  background: white !important;
+  padding: 20px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  z-index: 2147483647 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.ai-agent-loading-spinner {
+  width: 20px !important;
+  height: 20px !important;
+  border: 2px solid #f3f3f3 !important;
+  border-top: 2px solid #3b82f6 !important;
+  border-radius: 50% !important;
+  animation: ai-agent-spin 1s linear infinite !important;
+}
+
+@keyframes ai-agent-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error notification */
+.ai-agent-error {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  background: #fef2f2 !important;
+  color: #991b1b !important;
+  padding: 12px 16px !important;
+  border-radius: 6px !important;
+  border: 1px solid #fecaca !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  z-index: 2147483647 !important;
+  max-width: 300px !important;
+  font-size: 14px !important;
+}
+
+/* Success notification */
+.ai-agent-success {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  background: #dcfce7 !important;
+  color: #166534 !important;
+  padding: 12px 16px !important;
+  border-radius: 6px !important;
+  border: 1px solid #bbf7d0 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  z-index: 2147483647 !important;
+  max-width: 300px !important;
+  font-size: 14px !important;
+}
+
+/* Prevent conflicts with page styles */
+.ai-agent-highlight,
+.ai-agent-widget-container,
+.ai-agent-automation-overlay,
+.ai-agent-loading,
+.ai-agent-error,
+.ai-agent-success {
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  background: none !important;
+  font: inherit !important;
+  color: inherit !important;
+  text-align: left !important;
+  text-decoration: none !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+  line-height: normal !important;
+  vertical-align: baseline !important;
+}

@@ -1,0 +1,40 @@
+{
+  "name": "browser-ai-agent-test-suite",
+  "version": "1.0.0",
+  "description": "Comprehensive testing suite for Browser AI Agent",
+  "main": "browser-ai-agent-tester.ts",
+  "scripts": {
+    "test": "tsx browser-ai-agent-tester.ts",
+    "test:element-detection": "tsx browser-ai-agent-tester.ts --type element-detection",
+    "test:workflows": "tsx browser-ai-agent-tester.ts --type automation-workflows",
+    "test:ai-features": "tsx browser-ai-agent-tester.ts --type ai-features",
+    "test:self-healing": "tsx browser-ai-agent-tester.ts --type self-healing",
+    "test:performance": "tsx browser-ai-agent-tester.ts --type performance",
+    "test:real-websites": "tsx browser-ai-agent-tester.ts --type real-websites",
+    "test:all": "tsx browser-ai-agent-tester.ts --type all",
+    "benchmark": "tsx performance-benchmark.ts",
+    "demo": "tsx interactive-demo.ts"
+  },
+  "dependencies": {
+    "playwright": "^1.40.0",
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1",
+    "inquirer": "^8.2.6",
+    "commander": "^9.4.1",
+    "tsx": "^4.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/inquirer": "^9.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "browser-automation",
+    "ai-agent",
+    "testing",
+    "playwright",
+    "element-detection"
+  ],
+  "author": "Browser AI Agent Team",
+  "license": "MIT"
+}
